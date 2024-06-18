@@ -1,0 +1,29 @@
+@echo off
+setlocal
+
+rem Check if input file is provided
+if "%~1"=="" (
+    echo Usage: decryptor.bat inputfile
+    exit /b 1
+)
+
+set INPUT_FILE=%~1
+set OUTPUT_FILE=%INPUT_FILE:.RedRipper=
+
+rem Check if key file is provided
+if not exist key.bin (
+    echo Key file (key.bin) not found.
+    exit /b 1
+)
+
+rem Decrypt the file
+openssl enc -d -aes-256-cbc -in "%INPUT_FILE%" -out "%OUTPUT_FILE%" -pass file:key.bin
+
+if %ERRORLEVEL% neq 0 (
+    echo Decryption failed.
+    exit /b 1
+)
+
+echo Decryption successful. Output file: %OUTPUT_FILE%
+
+endlocal
