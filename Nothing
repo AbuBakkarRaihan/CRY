@@ -1,0 +1,31 @@
+@echo off
+setlocal
+
+rem Check if input file is provided
+if "%~1"=="" (
+    echo Usage: encryptor.bat inputfile
+    exit /b 1
+)
+
+set INPUT_FILE=%~1
+set OUTPUT_FILE=%INPUT_FILE%.RedRipper
+
+rem Generate a random key and IV
+set KEY_FILE=key.bin
+set IV_FILE=iv.bin
+certutil -generateSSTFromWU roots.sst
+certutil -delkey roots.sst
+del roots.sst
+certutil -encodehex %KEY_FILE% 32 hex
+
+rem Encrypt the file
+openssl enc -aes-256-cbc -in "%INPUT_FILE%" -out "%OUTPUT_FILE%" -pass file:%KEY_FILE%
+
+if %ERRORLEVEL% neq 0 (
+    echo Encryption failed.
+    exit /b 1
+)
+
+echo Encryption successful. Output file: %OUTPUT_FILE%
+
+endlocal
